@@ -1,0 +1,321 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Core primitives
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerifiedUser() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isBootstrappedAdmin() {
+      return isVerifiedUser() && request.auth.token.email == 'abeddnegoo1122@gmail.com';
+    }
+
+    function isAdmin() {
+      return isBootstrappedAdmin() || (isVerifiedUser() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)));
+    }
+
+    function isBoundedString(val, minLen, maxLen) {
+      return val is string && val.size() >= minLen && val.size() <= maxLen;
+    }
+
+    function isStringList(arr, maxItems, maxItemLen) {
+      return arr is list && arr.size() <= maxItems && (arr.size() == 0 || (arr[0] is string && arr[0].size() >= 1 && arr[0].size() <= maxItemLen));
+    }
+
+    function hasImmutableOwnerAndCreatedAt() {
+      return incoming().ownerId == existing().ownerId && incoming().createdAt == existing().createdAt;
+    }
+
+    // Validation Blueprints
+    function isValidProfile(data) {
+      return data.keys().hasAll([
+        'ownerId', 'displayName', 'shortName', 'roleSummary', 'location',
+        'academicStatus', 'publicEmail', 'bio', 'cardId', 'statusLabel',
+        'heroHeadline', 'contactHeadline', 'portraitUrl',
+        'technicalStack', 'humanSkills', 'careerFocus', 'updatedAt'
+      ]) && data.keys().hasOnly([
+        'ownerId', 'displayName', 'shortName', 'roleSummary', 'location',
+        'academicStatus', 'publicEmail', 'bio', 'cardId', 'statusLabel',
+        'heroHeadline', 'contactHeadline', 'portraitUrl',
+        'technicalStack', 'humanSkills', 'careerFocus', 'updatedAt'
+      ]) &&
+      isBoundedString(data.ownerId, 1, 128) &&
+      isBoundedString(data.displayName, 1, 100) &&
+      isBoundedString(data.shortName, 1, 50) &&
+      isBoundedString(data.roleSummary, 1, 120) &&
+      isBoundedString(data.location, 1, 120) &&
+      isBoundedString(data.academicStatus, 1, 140) &&
+      isBoundedString(data.publicEmail, 3, 120) &&
+      isBoundedString(data.bio, 1, 1000) &&
+      isBoundedString(data.cardId, 1, 32) &&
+      isBoundedString(data.statusLabel, 1, 32) &&
+      isBoundedString(data.heroHeadline, 1, 40) &&
+      isBoundedString(data.contactHeadline, 1, 80) &&
+      isBoundedString(data.portraitUrl, 0, 600) &&
+      isStringList(data.technicalStack, 20, 60) &&
+      isStringList(data.humanSkills, 20, 80) &&
+      isStringList(data.careerFocus, 10, 80) &&
+      data.updatedAt == request.time;
+    }
+
+    function isValidProject(data) {
+      return data.keys().hasAll([
+        'ownerId', 'title', 'meta', 'description', 'command', 'code',
+        'tags', 'repoUrl', 'theme', 'demoMode', 'order', 'published', 'createdAt', 'updatedAt'
+      ]) && data.keys().hasOnly([
+        'ownerId', 'title', 'meta', 'description', 'command', 'code',
+        'tags', 'repoUrl', 'theme', 'demoMode', 'order', 'published', 'createdAt', 'updatedAt'
+      ]) &&
+      isBoundedString(data.ownerId, 1, 128) &&
+      isBoundedString(data.title, 1, 100) &&
+      isBoundedString(data.meta, 1, 100) &&
+      isBoundedString(data.description, 1, 500) &&
+      isBoundedString(data.command, 1, 100) &&
+      isBoundedString(data.code, 1, 2000) &&
+      isStringList(data.tags, 8, 40) &&
+      isBoundedString(data.repoUrl, 0, 300) &&
+      data.theme in ['light', 'dark'] &&
+      data.demoMode in ['none', 'date-time', 'menu-pilihan'] &&
+      data.order is number && data.order >= 0 && data.order <= 9999 &&
+      data.published is bool &&
+      data.createdAt is timestamp &&
+      data.updatedAt == request.time;
+    }
+
+    function isValidEducation(data) {
+      return data.keys().hasAll([
+        'ownerId', 'period', 'degree', 'institution', 'rightBadge',
+        'isSchoolIcon', 'order', 'published', 'createdAt', 'updatedAt'
+      ]) && data.keys().hasOnly([
+        'ownerId', 'period', 'degree', 'institution', 'rightBadge',
+        'isSchoolIcon', 'order', 'published', 'createdAt', 'updatedAt'
+      ]) &&
+      isBoundedString(data.ownerId, 1, 128) &&
+      isBoundedString(data.period, 1, 60) &&
+      isBoundedString(data.degree, 1, 120) &&
+      isBoundedString(data.institution, 1, 140) &&
+      isBoundedString(data.rightBadge, 0, 40) &&
+      data.isSchoolIcon is bool &&
+      data.order is number && data.order >= 0 && data.order <= 9999 &&
+      data.published is bool &&
+      data.createdAt is timestamp &&
+      data.updatedAt == request.time;
+    }
+
+    function isValidExperience(data) {
+      return data.keys().hasAll([
+        'ownerId', 'period', 'role', 'organization', 'order', 'published', 'createdAt', 'updatedAt'
+      ]) && data.keys().hasOnly([
+        'ownerId', 'period', 'role', 'organization', 'order', 'published', 'createdAt', 'updatedAt'
+      ]) &&
+      isBoundedString(data.ownerId, 1, 128) &&
+      isBoundedString(data.period, 1, 60) &&
+      isBoundedString(data.role, 1, 120) &&
+      isBoundedString(data.organization, 1, 140) &&
+      data.order is number && data.order >= 0 && data.order <= 9999 &&
+      data.published is bool &&
+      data.createdAt is timestamp &&
+      data.updatedAt == request.time;
+    }
+
+    function isValidAchievement(data) {
+      return data.keys().hasAll([
+        'ownerId', 'number', 'title', 'description', 'order', 'published', 'createdAt', 'updatedAt'
+      ]) && data.keys().hasOnly([
+        'ownerId', 'number', 'title', 'description', 'order', 'published', 'createdAt', 'updatedAt'
+      ]) &&
+      isBoundedString(data.ownerId, 1, 128) &&
+      isBoundedString(data.number, 1, 12) &&
+      isBoundedString(data.title, 1, 100) &&
+      isBoundedString(data.description, 1, 360) &&
+      data.order is number && data.order >= 0 && data.order <= 9999 &&
+      data.published is bool &&
+      data.createdAt is timestamp &&
+      data.updatedAt == request.time;
+    }
+
+    function isValidDeckCard(data) {
+      return data.keys().hasAll([
+        'ownerId', 'indexLabel', 'topRightLabel', 'title', 'tagline',
+        'variant', 'sectionTarget', 'order', 'published', 'createdAt', 'updatedAt'
+      ]) && data.keys().hasOnly([
+        'ownerId', 'indexLabel', 'topRightLabel', 'title', 'tagline',
+        'variant', 'sectionTarget', 'order', 'published', 'createdAt', 'updatedAt'
+      ]) &&
+      isBoundedString(data.ownerId, 1, 128) &&
+      isBoundedString(data.indexLabel, 1, 24) &&
+      isBoundedString(data.topRightLabel, 1, 24) &&
+      isBoundedString(data.title, 1, 40) &&
+      isBoundedString(data.tagline, 1, 140) &&
+      data.variant in ['dark-neural', 'forest-emblem', 'portrait', 'light-grid', 'dark-lens'] &&
+      isBoundedString(data.sectionTarget, 1, 40) &&
+      data.order is number && data.order >= 0 && data.order <= 9999 &&
+      data.published is bool &&
+      data.createdAt is timestamp &&
+      data.updatedAt == request.time;
+    }
+
+    function isValidContactLink(data) {
+      return data.keys().hasAll([
+        'ownerId', 'label', 'href', 'external', 'order', 'published', 'createdAt', 'updatedAt'
+      ]) && data.keys().hasOnly([
+        'ownerId', 'label', 'href', 'external', 'order', 'published', 'createdAt', 'updatedAt'
+      ]) &&
+      isBoundedString(data.ownerId, 1, 128) &&
+      isBoundedString(data.label, 1, 40) &&
+      isBoundedString(data.href, 1, 300) &&
+      data.external is bool &&
+      data.order is number && data.order >= 0 && data.order <= 9999 &&
+      data.published is bool &&
+      data.createdAt is timestamp &&
+      data.updatedAt == request.time;
+    }
+
+    function isValidAdminRecord(data, userId) {
+      return data.keys().hasAll(['uid', 'role', 'createdAt']) &&
+        data.keys().hasOnly(['uid', 'role', 'createdAt']) &&
+        data.uid == userId &&
+        data.role == 'admin' &&
+        data.createdAt == request.time;
+    }
+
+    // Public portfolio profile (/portfolio_profile/public)
+    match /portfolio_profile/{profileId} {
+      allow get: if isValidId(profileId) && (profileId == 'public' || isAdmin());
+      allow list: if isBootstrappedAdmin();
+      allow create: if isValidId(profileId) && profileId == 'public' && isAdmin() &&
+        isValidProfile(incoming()) && incoming().ownerId == request.auth.uid;
+      allow update: if isValidId(profileId) && profileId == 'public' && isAdmin() &&
+        isValidProfile(incoming()) && incoming().ownerId == existing().ownerId &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'displayName', 'shortName', 'roleSummary', 'location',
+          'academicStatus', 'publicEmail', 'bio', 'cardId', 'statusLabel',
+          'heroHeadline', 'contactHeadline', 'portraitUrl',
+          'technicalStack', 'humanSkills', 'careerFocus', 'updatedAt'
+        ]);
+      allow delete: if false;
+    }
+
+    // Projects
+    match /projects/{projectId} {
+      allow get: if isValidId(projectId) && (existing().published == true || isAdmin());
+      allow list: if existing().published == true || isBootstrappedAdmin();
+      allow create: if isValidId(projectId) && isAdmin() && isValidProject(incoming()) &&
+        incoming().ownerId == request.auth.uid && incoming().createdAt == request.time;
+      allow update: if isValidId(projectId) && isAdmin() && isValidProject(incoming()) &&
+        hasImmutableOwnerAndCreatedAt() &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'title', 'meta', 'description', 'command', 'code',
+          'tags', 'repoUrl', 'theme', 'demoMode', 'order', 'published', 'updatedAt'
+        ]);
+      allow delete: if isValidId(projectId) && isAdmin();
+    }
+
+    // Education
+    match /education/{itemId} {
+      allow get: if isValidId(itemId) && (existing().published == true || isAdmin());
+      allow list: if existing().published == true || isBootstrappedAdmin();
+      allow create: if isValidId(itemId) && isAdmin() && isValidEducation(incoming()) &&
+        incoming().ownerId == request.auth.uid && incoming().createdAt == request.time;
+      allow update: if isValidId(itemId) && isAdmin() && isValidEducation(incoming()) &&
+        hasImmutableOwnerAndCreatedAt() &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'period', 'degree', 'institution', 'rightBadge',
+          'isSchoolIcon', 'order', 'published', 'updatedAt'
+        ]);
+      allow delete: if isValidId(itemId) && isAdmin();
+    }
+
+    // Experience & Leadership
+    match /experiences/{itemId} {
+      allow get: if isValidId(itemId) && (existing().published == true || isAdmin());
+      allow list: if existing().published == true || isBootstrappedAdmin();
+      allow create: if isValidId(itemId) && isAdmin() && isValidExperience(incoming()) &&
+        incoming().ownerId == request.auth.uid && incoming().createdAt == request.time;
+      allow update: if isValidId(itemId) && isAdmin() && isValidExperience(incoming()) &&
+        hasImmutableOwnerAndCreatedAt() &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'period', 'role', 'organization', 'order', 'published', 'updatedAt'
+        ]);
+      allow delete: if isValidId(itemId) && isAdmin();
+    }
+
+    // Achievements
+    match /achievements/{itemId} {
+      allow get: if isValidId(itemId) && (existing().published == true || isAdmin());
+      allow list: if existing().published == true || isBootstrappedAdmin();
+      allow create: if isValidId(itemId) && isAdmin() && isValidAchievement(incoming()) &&
+        incoming().ownerId == request.auth.uid && incoming().createdAt == request.time;
+      allow update: if isValidId(itemId) && isAdmin() && isValidAchievement(incoming()) &&
+        hasImmutableOwnerAndCreatedAt() &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'number', 'title', 'description', 'order', 'published', 'updatedAt'
+        ]);
+      allow delete: if isValidId(itemId) && isAdmin();
+    }
+
+    // Hero Deck Cards
+    match /deck_cards/{cardId} {
+      allow get: if isValidId(cardId) && (existing().published == true || isAdmin());
+      allow list: if existing().published == true || isBootstrappedAdmin();
+      allow create: if isValidId(cardId) && isAdmin() && isValidDeckCard(incoming()) &&
+        incoming().ownerId == request.auth.uid && incoming().createdAt == request.time;
+      allow update: if isValidId(cardId) && isAdmin() && isValidDeckCard(incoming()) &&
+        hasImmutableOwnerAndCreatedAt() &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'indexLabel', 'topRightLabel', 'title', 'tagline',
+          'variant', 'sectionTarget', 'order', 'published', 'updatedAt'
+        ]);
+      allow delete: if isValidId(cardId) && isAdmin();
+    }
+
+    // Contact Links
+    match /contact_links/{linkId} {
+      allow get: if isValidId(linkId) && (existing().published == true || isAdmin());
+      allow list: if existing().published == true || isBootstrappedAdmin();
+      allow create: if isValidId(linkId) && isAdmin() && isValidContactLink(incoming()) &&
+        incoming().ownerId == request.auth.uid && incoming().createdAt == request.time;
+      allow update: if isValidId(linkId) && isAdmin() && isValidContactLink(incoming()) &&
+        hasImmutableOwnerAndCreatedAt() &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'label', 'href', 'external', 'order', 'published', 'updatedAt'
+        ]);
+      allow delete: if isValidId(linkId) && isAdmin();
+    }
+
+    // Admin Records (restricted strictly to own UID or bootstrapped admin)
+    match /admins/{userId} {
+      allow get: if isValidId(userId) && isVerifiedUser() && (request.auth.uid == userId || isBootstrappedAdmin());
+      allow list: if isBootstrappedAdmin();
+      allow create: if isValidId(userId) && isBootstrappedAdmin() && isValidAdminRecord(incoming(), userId);
+      allow update, delete: if false;
+    }
+
+    // Connection probe path for startup getDocFromServer check
+    match /test/{probeId} {
+      allow get: if isValidId(probeId) && probeId == 'connection';
+      allow list, write: if false;
+    }
+  }
+}

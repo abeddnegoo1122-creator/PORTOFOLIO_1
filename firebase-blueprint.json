@@ -1,0 +1,279 @@
+{
+  "entities": {
+    "PortfolioProfile": {
+      "title": "PortfolioProfile",
+      "description": "Public portfolio identity, biography, skills arrays, and hero/contact headlines.",
+      "type": "object",
+      "properties": {
+        "ownerId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "displayName": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "shortName": { "type": "string", "minLength": 1, "maxLength": 50 },
+        "roleSummary": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "location": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "academicStatus": { "type": "string", "minLength": 1, "maxLength": 140 },
+        "publicEmail": { "type": "string", "minLength": 3, "maxLength": 120 },
+        "bio": { "type": "string", "minLength": 1, "maxLength": 1000 },
+        "cardId": { "type": "string", "minLength": 1, "maxLength": 32 },
+        "statusLabel": { "type": "string", "minLength": 1, "maxLength": 32 },
+        "heroHeadline": { "type": "string", "minLength": 1, "maxLength": 40 },
+        "contactHeadline": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "portraitUrl": { "type": "string", "minLength": 0, "maxLength": 600 },
+        "technicalStack": { "type": "array", "description": "Technical skill labels (max 20)." },
+        "humanSkills": { "type": "array", "description": "Collaboration & soft skill labels (max 20)." },
+        "careerFocus": { "type": "array", "description": "Career focus lines (max 10)." },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "ownerId",
+        "displayName",
+        "shortName",
+        "roleSummary",
+        "location",
+        "academicStatus",
+        "publicEmail",
+        "bio",
+        "cardId",
+        "statusLabel",
+        "heroHeadline",
+        "contactHeadline",
+        "portraitUrl",
+        "technicalStack",
+        "humanSkills",
+        "careerFocus",
+        "updatedAt"
+      ]
+    },
+    "PortfolioProject": {
+      "title": "PortfolioProject",
+      "description": "A portfolio project card with code snippet, tags, and interactive demo mode.",
+      "type": "object",
+      "properties": {
+        "ownerId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "title": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "meta": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "description": { "type": "string", "minLength": 1, "maxLength": 500 },
+        "command": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "code": { "type": "string", "minLength": 1, "maxLength": 2000 },
+        "tags": { "type": "array", "description": "Project tags (max 8)." },
+        "repoUrl": { "type": "string", "minLength": 0, "maxLength": 300 },
+        "theme": { "type": "string", "enum": ["light", "dark"] },
+        "demoMode": { "type": "string", "enum": ["none", "date-time", "menu-pilihan"] },
+        "order": { "type": "number" },
+        "published": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "ownerId",
+        "title",
+        "meta",
+        "description",
+        "command",
+        "code",
+        "tags",
+        "repoUrl",
+        "theme",
+        "demoMode",
+        "order",
+        "published",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "EducationItem": {
+      "title": "EducationItem",
+      "description": "Academic background entry displayed in the About section.",
+      "type": "object",
+      "properties": {
+        "ownerId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "period": { "type": "string", "minLength": 1, "maxLength": 60 },
+        "degree": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "institution": { "type": "string", "minLength": 1, "maxLength": 140 },
+        "rightBadge": { "type": "string", "minLength": 0, "maxLength": 40 },
+        "isSchoolIcon": { "type": "boolean" },
+        "order": { "type": "number" },
+        "published": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "ownerId",
+        "period",
+        "degree",
+        "institution",
+        "rightBadge",
+        "isSchoolIcon",
+        "order",
+        "published",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "ExperienceItem": {
+      "title": "ExperienceItem",
+      "description": "Leadership or organizational experience entry.",
+      "type": "object",
+      "properties": {
+        "ownerId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "period": { "type": "string", "minLength": 1, "maxLength": 60 },
+        "role": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "organization": { "type": "string", "minLength": 1, "maxLength": 140 },
+        "order": { "type": "number" },
+        "published": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "ownerId",
+        "period",
+        "role",
+        "organization",
+        "order",
+        "published",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "AchievementItem": {
+      "title": "AchievementItem",
+      "description": "Milestone or achievement entry displayed in the 2x2 grid.",
+      "type": "object",
+      "properties": {
+        "ownerId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "number": { "type": "string", "minLength": 1, "maxLength": 12 },
+        "title": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "description": { "type": "string", "minLength": 1, "maxLength": 360 },
+        "order": { "type": "number" },
+        "published": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "ownerId",
+        "number",
+        "title",
+        "description",
+        "order",
+        "published",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "DeckCardItem": {
+      "title": "DeckCardItem",
+      "description": "Interactive card in the Hero 5-card fan.",
+      "type": "object",
+      "properties": {
+        "ownerId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "indexLabel": { "type": "string", "minLength": 1, "maxLength": 24 },
+        "topRightLabel": { "type": "string", "minLength": 1, "maxLength": 24 },
+        "title": { "type": "string", "minLength": 1, "maxLength": 40 },
+        "tagline": { "type": "string", "minLength": 1, "maxLength": 140 },
+        "variant": {
+          "type": "string",
+          "enum": ["dark-neural", "forest-emblem", "portrait", "light-grid", "dark-lens"]
+        },
+        "sectionTarget": { "type": "string", "minLength": 1, "maxLength": 40 },
+        "order": { "type": "number" },
+        "published": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "ownerId",
+        "indexLabel",
+        "topRightLabel",
+        "title",
+        "tagline",
+        "variant",
+        "sectionTarget",
+        "order",
+        "published",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "ContactLinkItem": {
+      "title": "ContactLinkItem",
+      "description": "External or mailto contact button in the Contact section.",
+      "type": "object",
+      "properties": {
+        "ownerId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "label": { "type": "string", "minLength": 1, "maxLength": 40 },
+        "href": { "type": "string", "minLength": 1, "maxLength": 300 },
+        "external": { "type": "boolean" },
+        "order": { "type": "number" },
+        "published": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "ownerId",
+        "label",
+        "href",
+        "external",
+        "order",
+        "published",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "AdminRecord": {
+      "title": "AdminRecord",
+      "description": "Admin role assignment document keyed by Firebase Auth UID.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "role": { "type": "string", "enum": ["admin"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "role", "createdAt"]
+    },
+    "ConnectionProbe": {
+      "title": "ConnectionProbe",
+      "description": "Connectivity verification probe path.",
+      "type": "object",
+      "properties": {
+        "ok": { "type": "boolean" }
+      }
+    }
+  },
+  "firestore": {
+    "/portfolio_profile/{profileId}": {
+      "schema": "PortfolioProfile",
+      "description": "Published public portfolio profile configuration document (/portfolio_profile/public)."
+    },
+    "/projects/{projectId}": {
+      "schema": "PortfolioProject",
+      "description": "CMS-managed portfolio projects."
+    },
+    "/education/{itemId}": {
+      "schema": "EducationItem",
+      "description": "CMS-managed academic background entries."
+    },
+    "/experiences/{itemId}": {
+      "schema": "ExperienceItem",
+      "description": "CMS-managed experience and leadership records."
+    },
+    "/achievements/{itemId}": {
+      "schema": "AchievementItem",
+      "description": "CMS-managed milestone and achievement cards."
+    },
+    "/deck_cards/{cardId}": {
+      "schema": "DeckCardItem",
+      "description": "CMS-managed Hero fan deck cards."
+    },
+    "/contact_links/{linkId}": {
+      "schema": "ContactLinkItem",
+      "description": "CMS-managed contact links."
+    },
+    "/admins/{userId}": {
+      "schema": "AdminRecord",
+      "description": "Verified CMS administrators."
+    },
+    "/test/{probeId}": {
+      "schema": "ConnectionProbe",
+      "description": "Read-only connection probe document."
+    }
+  }
+}
